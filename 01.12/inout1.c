@@ -27,7 +27,7 @@ struct MYFILE *mfopen(const char * fname, const char * mode){
 	struct MYFILE * f = (struct MYFILE *) malloc (sizeof(struct MYFILE));
 	f->fd = file;
 	f->bufPos = a;
-	f->bufChars = 0;
+	f->bufChars = a;
 	return f;
 }
 
@@ -63,22 +63,14 @@ void pch(int c, struct MYFILE *pFile){
 int main(int argc, char const *argv[])
 {
 	struct MYFILE* file;
-	file = mfopen("test.txt", "w");
-	int c = 'a';
-	pch(c, file);
-	c = '\n';
-	pch(c, file);
-
-	//while (c = getchar() != EOF)
-	//	pch(c, file);
+	file = mfopen(argv[1], "w");
+	int c;
+	while ((c = getchar()) != EOF)
+		pch(c, file);
 	mfclose(file);
-	file = mfopen("test.txt", "r");
-	c = gch(file);
-	printf("%c\n", c);
-	//c = gch(file);
-	//putchar(c);
-	//while (c = gch(file) != EOF)
-	//	putchar(c);
-
+	file = mfopen(argv[1], "r");
+	while ((c = gch(file)) != EOF)
+		putchar(c);
+	mfclose(file);
 	return 0;
 }
