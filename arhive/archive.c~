@@ -1,0 +1,123 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int MakeInt(char *str){
+	if ( (*str) < '0' || (*str) > '9')
+		return -1;
+	short res = 0;
+	while(*str != '\0'){
+		res *= 10;
+		res += *str - '0';
+		str++;
+	}
+	return res;
+}
+
+int lastblock = 0;
+
+char *ReadBlock(FILE *file, short N){
+	char *block = malloc(N);
+	int i;
+	int flag;
+	for(i=0; i<N; i++){
+		flag = fscanf(file, "%c", &block[i]);
+		if (flag == -1){
+			lastblock++;
+			block[i] ='\0';
+			return block;
+		}
+	}
+	return block;
+}
+
+struct element{
+	char *block;
+	struct element *next;
+};
+
+struct element* AddBlock(struct element * list, char *block){
+	if (list == NULL){
+		list = malloc(sizeof(struct element));
+		list->block = block;
+		list->next = NULL;
+		return list;
+	}
+	else{
+		struct element *head = list;
+		while(list->next != NULL){
+			if(!strcmp(list->block, block))
+				return head;
+			list = list->next;
+		}
+		if (!strcmp(list->block, block))
+			return head;
+		else{
+			list->next = malloc(sizeof(struct element));
+			list = list->next;
+			list->next = NULL;
+			list->block = block;
+		list = head;
+		return list;
+		}
+	}
+	
+}
+
+short ListLength(struct element *list){
+	short res=0;
+	while(list != NULL){
+		list = list->next;
+		res++;
+	}
+	return res;
+}
+
+void PrintList(struct element *list, short N){
+	while(list != NULL){
+		int i;
+		for (i=0; i<N; i++)
+			printf("%c", list->block[i]);
+		printf("\n");
+		list = list->next;
+	}
+}
+
+int main(int argc, char *argv[]){
+	char *input;
+	short N;
+	if (argc == 3){
+		 input = argv[1];
+		 N = MakeInt(argv[2]);
+	}
+	else if (argc == 2){
+		N = MakeInt(argv[1]);
+		if (N == -1){
+			input = argv[1];
+			N = 32;
+		}
+		else{
+			char str[] = "stdin\0";
+			input = str;
+		}
+	}
+	FILE * fin = fopen(input, "r");
+	printf("%d %s", N, input);
+	printf("\n");
+	struct element * list = NULL;
+	short lastlength;
+	while(!lastblock){
+		char * block = ReadBlock(fin, N);
+		list = AddBlock(list, block);
+		if(lastblock)
+			lastlength = strlen(block);
+	}
+	fclose(fin);
+	FILE *fout = fopen(strcat(input, ".coded"), "w");
+	fin = fopen(input, "r");
+	fprintf(fout, "%hd", N);
+	fprintf(fout, "%hd", lastlength);
+	PrintList(list, N);
+	printf("%d\n", lastlength);
+	return 0;
+}
